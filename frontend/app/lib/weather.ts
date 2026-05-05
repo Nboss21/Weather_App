@@ -54,8 +54,13 @@ async function backendPostRecord(query: string): Promise<WeatherResult> {
 
   let res: Response;
   try {
-    const token = typeof window !== "undefined" ? localStorage.getItem("skycast_token") : null;
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("skycast_token")
+        : null;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
     res = await fetch(`${API_URL}/records`, {
@@ -64,15 +69,15 @@ async function backendPostRecord(query: string): Promise<WeatherResult> {
       body: JSON.stringify({
         locationQuery: query,
         startDate,
-        endDate
-      })
+        endDate,
+      }),
     });
   } catch (error) {
     throw new Error("API_ERROR");
   }
 
   const data = await res.json();
-  
+
   if (!res.ok) {
     // Backend returns { error: "Location not found: ..." }
     if (data.error && data.error.toLowerCase().includes("location not found")) {
@@ -87,13 +92,15 @@ async function backendPostRecord(query: string): Promise<WeatherResult> {
   const c = weatherData.current;
   const d = weatherData.daily;
 
-  const forecast: DayForecast[] = (d.time as string[]).slice(0, 5).map((date, i) => ({
-    date,
-    dayName: buildDayName(date),
-    high: Math.round((d.temperature_2m_max as number[])[i]),
-    low: Math.round((d.temperature_2m_min as number[])[i]),
-    weatherCode: (d.weather_code as number[])[i],
-  }));
+  const forecast: DayForecast[] = (d.time as string[])
+    .slice(0, 5)
+    .map((date, i) => ({
+      date,
+      dayName: buildDayName(date),
+      high: Math.round((d.temperature_2m_max as number[])[i]),
+      low: Math.round((d.temperature_2m_min as number[])[i]),
+      weatherCode: (d.weather_code as number[])[i],
+    }));
 
   return {
     current: {
@@ -105,22 +112,27 @@ async function backendPostRecord(query: string): Promise<WeatherResult> {
       locationName: data.locationName,
       country: "", // we can omit country as it's not strictly necessary for the UI, or parse it if we want
       latitude: data.latitude,
-      longitude: data.longitude
+      longitude: data.longitude,
     },
     forecast,
     alerts: weatherData.alerts?.map((a: any) => ({
       event: a.properties?.event || "Alert",
       headline: a.properties?.headline || "Weather Alert",
       description: a.properties?.description || "",
-      severity: a.properties?.severity || "Unknown"
-    }))
+      severity: a.properties?.severity || "Unknown",
+    })),
   };
 }
 
-export async function fetchWeatherByQuery(query: string): Promise<WeatherResult> {
+export async function fetchWeatherByQuery(
+  query: string,
+): Promise<WeatherResult> {
   return backendPostRecord(query);
 }
 
-export async function fetchWeatherByCoords(lat: number, lon: number): Promise<WeatherResult> {
+export async function fetchWeatherByCoords(
+  lat: number,
+  lon: number,
+): Promise<WeatherResult> {
   return backendPostRecord(`${lat},${lon}`);
 }

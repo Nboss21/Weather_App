@@ -11,7 +11,7 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
+//meta data
 export const metadata: Metadata = {
   title: "Skycast — Weather for Any Location",
   description:
