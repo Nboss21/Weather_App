@@ -1,3 +1,5 @@
+import { API_URL } from "./api";
+
 export interface CurrentWeather {
   temperature: number;
   feelsLike: number;
@@ -56,7 +58,7 @@ async function backendPostRecord(query: string): Promise<WeatherResult> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    res = await fetch("http://localhost:4000/api/records", {
+    res = await fetch(`${API_URL}/records`, {
       method: "POST",
       headers,
       body: JSON.stringify({

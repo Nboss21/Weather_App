@@ -8,6 +8,7 @@ const zod_1 = require("zod");
 const db_1 = __importDefault(require("../db"));
 const weather_1 = require("../services/weather");
 const wikipedia_1 = require("../services/wikipedia");
+const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 // Validation schema for creating a record
 const createRecordSchema = zod_1.z.object({
@@ -17,7 +18,7 @@ const createRecordSchema = zod_1.z.object({
     notes: zod_1.z.string().optional()
 });
 // CREATE: Post a new weather query
-router.post("/", async (req, res) => {
+router.post("/", auth_1.optionalAuth, async (req, res) => {
     try {
         const parsed = createRecordSchema.safeParse(req.body);
         if (!parsed.success) {
@@ -33,7 +34,7 @@ router.post("/", async (req, res) => {
         // 2. Save to database
         const record = await db_1.default.weatherRecord.create({
             data: {
-                userId: req.user.id,
+                userId: req.user?.id || null,
                 locationQuery,
                 locationName: weatherInfo.locationName,
                 latitude: weatherInfo.latitude,
@@ -53,7 +54,7 @@ router.post("/", async (req, res) => {
     }
 });
 // READ: Get all records
-router.get("/", async (req, res) => {
+router.get("/", auth_1.authenticateToken, async (req, res) => {
     try {
         const records = await db_1.default.weatherRecord.findMany({
             where: { userId: req.user.id },
@@ -66,7 +67,7 @@ router.get("/", async (req, res) => {
     }
 });
 // READ: Get a single record with Wikipedia context (API Integration)
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth_1.authenticateToken, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
         const record = await db_1.default.weatherRecord.findUnique({ where: { id } });
@@ -91,7 +92,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 // UPDATE: Update a record
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth_1.authenticateToken, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
         const record = await db_1.default.weatherRecord.findUnique({ where: { id } });
@@ -139,7 +140,7 @@ router.put("/:id", async (req, res) => {
     }
 });
 // DELETE: Remove a record
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth_1.authenticateToken, async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
         const record = await db_1.default.weatherRecord.findUnique({ where: { id } });

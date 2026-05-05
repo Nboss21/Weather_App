@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import WeatherMap from "../components/WeatherMap";
+import { API_URL } from "../lib/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface WeatherRecord {
@@ -25,8 +26,6 @@ interface RecordDetail extends WeatherRecord {
     wikipediaSummary: string;
   };
 }
-
-const API = "http://localhost:4000/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmtDate(iso: string) {
@@ -105,7 +104,7 @@ export default function HistoryPage() {
     setError(null);
     try {
       const token = localStorage.getItem("skycast_token");
-      const res = await fetch(`${API}/records`, {
+      const res = await fetch(`${API_URL}/records`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (res.status === 401 || res.status === 403) throw new Error("Unauthorized: Please log in.");
@@ -133,7 +132,7 @@ export default function HistoryPage() {
     setDetailLoading(true);
     try {
       const token = localStorage.getItem("skycast_token");
-      const res = await fetch(`${API}/records/${id}`, {
+      const res = await fetch(`${API_URL}/records/${id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (!res.ok) throw new Error("Failed to fetch record detail");
@@ -166,7 +165,7 @@ export default function HistoryPage() {
     setEditError(null);
     try {
       const token = localStorage.getItem("skycast_token");
-      const res = await fetch(`${API}/records/${editRecord.id}`, {
+      const res = await fetch(`${API_URL}/records/${editRecord.id}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -195,7 +194,7 @@ export default function HistoryPage() {
     setDeleting(true);
     try {
       const token = localStorage.getItem("skycast_token");
-      const res = await fetch(`${API}/records/${deleteId}`, { 
+      const res = await fetch(`${API_URL}/records/${deleteId}`, { 
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
@@ -214,7 +213,7 @@ export default function HistoryPage() {
   const exportData = async (format: string) => {
     try {
       const token = localStorage.getItem("skycast_token");
-      const res = await fetch(`${API}/export/${format}`, {
+      const res = await fetch(`${API_URL}/export/${format}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (!res.ok) throw new Error("Export failed");

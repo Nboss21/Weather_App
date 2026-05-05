@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import recordsRouter from "./routes/records";
@@ -7,8 +8,9 @@ import { authenticateToken } from "./middleware/auth";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const allowedOrigin = process.env.CORS_ALLOWED_ORIGIN || "http://localhost:3000";
 
-app.use(cors());
+app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 
 app.use("/api/auth", authRouter);
